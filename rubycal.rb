@@ -29,6 +29,9 @@ class CalendarPrinter
   def initialize(year, month)
     @year = year
     @month = month
+    
+    #these will be stored to compare the date being printed with 'today' such that 'today'
+    #can be marked as such in the printed calendar
     t = Time.new
     @todayYear = t.year
     @todayMonth = t.month
@@ -36,18 +39,26 @@ class CalendarPrinter
   end
   
   def printCalendar
+    #print the top dashed line
     print "+"
     34.times do print "-" end
     print "+\n"
+    
+    #print the 'month, year' centered as the calendar title
     puts "|#{(Date::MONTHNAMES[@month] + ",  " + @year.to_s).center 34}|"
     printSeparatorLine
+    
+    #shortened names for days of the week
     printDayNames
     printSeparatorLine
+    
+    #print all the days in the given month
     printMonthDays
     printSeparatorLine
   end
   
   private
+  
   def printSeparatorLine
     7.times do print "+----" end
     print "+\n"
@@ -77,10 +88,16 @@ class CalendarPrinter
   end
 
   def printMonthDays
+    #tracks how many days (or blank days) have already been printed for this calendar week
     daysThisRow = 0
+    
+    #print enough blank days so the first day of the month will be correctly positioned
     firstDayOfMonth.times do printBlankDay; daysThisRow += 1 end
+    
+    #how many days are in this month?
     daysInThisMonth = daysInMonth
     daysInThisMonth.times do | dayNumber |
+      #as soon as we've printed 7 days, reset to the next line
       if daysThisRow == 7 
         print "|\n"
         printSeparatorLine
@@ -89,6 +106,8 @@ class CalendarPrinter
       printDay(dayNumber + 1)
       daysThisRow += 1
     end
+    
+    #print enough blank days at the end of the month to fill up the week
     while(daysThisRow < 7) do printBlankDay; daysThisRow += 1 end
     print "|\n"
   end
