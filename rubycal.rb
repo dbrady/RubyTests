@@ -1,4 +1,23 @@
 #!/bin/env ruby
+# == Synopsis
+#
+# getopt: shows the month and year for today, or based on command line
+#
+# == Usage
+#
+# getopt [OPTION]  (or 'ruby getopt.rb [OPTION]')
+#
+# -h, --help:
+#    show help
+#
+# -m x, --month x:
+#    use x as the month number to show
+#
+# -y x, --year x:
+#    use x as the year number to show
+
+require 'getoptlong'
+require 'rdoc/usage'
 
 class CalendarPrinter
   attr :year
@@ -80,49 +99,30 @@ class CalendarPrinter
 
 end
 
-def getCommandLineParametersOrDefaults
+def parseCommandLine
+  opts = GetoptLong.new(
+    ['--help', '-h', GetoptLong::NO_ARGUMENT],
+    ['--month', '-m', GetoptLong::OPTIONAL_ARGUMENT],
+    ['--year', '-y', GetoptLong::OPTIONAL_ARGUMENT]
+  )
+
   t = Time.new
-  month = t.month
   year = t.year
-  ARGV.each do |arg|
-    if(arg.start_with? "-y")
-      tmp = arg[2..(arg.length - 1)]
-      year = tmp.to_i
+  month = t.month
+
+  opts.each do |opt, arg|
+    case opt
+    when '--help'
+      RDoc::usage
+    when '--month'
+      month = arg.to_i
+    when '--year'
+      year = arg.to_i
     end
-    if(arg.start_with? "-m")
-      tmp = arg[2..(arg.length - 1)]
-      month = tmp.to_i
-    end
-  end
+  end  
   return year, month
 end
 
-def isHelp?
-  ARGV.each do |arg|
-    return true if (arg.start_with? "-h") || (arg.start_with? "--h")
-  end
-  return false
-end
-
-def showHelpAndExit
-  puts ""
-  puts "RubyCal"
-  puts ""
-  puts "Usage:"
-  puts ""
-  puts "\truby RubyCal.rb"
-  puts "\t(show a calendar for the current month)"
-  puts ""
-  puts "\truby RubyCal.rb [-yyear] [-mmonth]"
-  puts "\t(show a calendar for the specified year and month (i.e.: '-y2009 -m10'))"
-  puts ""
-  puts "\truby RubyCal.rb -h"
-  puts "\t(show this help information)"
-  puts ""
-  exit
-end
-
-showHelpAndExit if isHelp?
-year, month = getCommandLineParametersOrDefaults
+year, month = parseCommandLine
 cal = CalendarPrinter.new(year, month)
 cal.printCalendar
